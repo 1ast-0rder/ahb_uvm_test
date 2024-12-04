@@ -1,0 +1,15 @@
+first:
+source setup.csh
+
+cd ./verification/
+
+make:
+        make clean vcs_testbench run wave=on tc=basic_test
+    or
+        make clean vcs_testbench run wave=on tc=random_test test_cmd_num=3000 seed=99
+
+open wave:
+        make verdi wave=on
+
+clean:
+        make clean
