@@ -2,48 +2,47 @@ module ahb_master # (
     parameter AHB_ADDR_WIDTH        = 32
 )
 (
-    input                           hclk,
-    input                           hresetn,
+    input                           hclk,           // AHB 时钟信号
+    input                           hresetn,        // AHB 复位信号，低电平有效
 
-    input                           din_vld_i,
-    output                          din_rdy_o,
-    input                           wr_en_i,
-    input                           rd_en_i,
-    input  [2:0]                    data_size_i,
-    input  [31:0]                   addr_i,
-    input  [31:0]                   wdata_i,
-    output                          dout_vld_o,
-    output [31:0]                   rdata_o,
-    input                           dout_rdy_i,
+    input                           din_vld_i,      // 数据输入有效信号
+    output                          din_rdy_o,      // 数据输入准备好信号
+    input                           wr_en_i,        // 写使能输入信号
+    input                           rd_en_i,        // 读使能输入信号
+    input  [2:0]                    data_size_i,    // 数据大小输入信号
+    input  [31:0]                   addr_i,         // 地址输入信号
+    input  [31:0]                   wdata_i,        // 写数据输入信号
+    output                          dout_vld_o,     // 数据输出有效信号
+    output [31:0]                   rdata_o,        // 读数据输出信号
+    input                           dout_rdy_i,     // 数据输出准备好信号
 
-    output reg [3:0]                hprot_o,
-    output reg [2:0]                hburst_o,
-    output reg                      hmastlock_o,
-    output reg [1:0]                htrans_o,
-    output reg [2:0]                hsize_o,
-    output reg [31:0]               haddr_o,
-    output reg                      hwrite_o,
-    output reg [31:0]               hwdata_o,
+    output  [3:0]                hprot_o,           // 保护控制输出信号
+    output  [2:0]                hburst_o,          // 突发类型输出信号
+    output                       hmastlock_o,       // 主锁输出信号
+    output  [1:0]                htrans_o,          // 传输类型输出信号
+    output  [2:0]                hsize_o,           // 传输大小输出信号
+    output  [31:0]               haddr_o,           // 地址输出信号
+    output                       hwrite_o,          // 写使能输出信号
+    output  [31:0]               hwdata_o,          // 写数据输出信号
 
-    input                           hreadyout_i,
-    input  [31:0]                   hrdata_i,
-    input  [1:0]                    hresp_i
+    input                           hreadyout_i,    // 准备好输出输入信号
+    input  [31:0]                   hrdata_i,       // 读数据输入信号
+    input  [1:0]                    hresp_i         // 响应输入信号
 );
 
-wire            write_cmd_w;
-wire            read_cmd_w;
-reg  [31:0]     wdata_w;
-reg  [31:0]     wdata_r;
-reg             read_cmd_r;
-reg  [31:0]     read_addr_r;
-reg  [31:0]     hrdata_r;
-wire [31:0]     hrdata_w;
-reg  [31:0]     rdata_w;
-reg  [31:0]     rdata_r;
-reg             read_vld_r;
-wire            read_vld_w;
-wire [31:0]     rdataout_w;
-
+wire            write_cmd_w;       // 写命令信号
+wire            read_cmd_w;        // 读命令信号
+reg  [31:0]     wdata_w;           // 写数据寄存器
+reg  [31:0]     wdata_r;           // 写数据寄存器
+reg             read_cmd_r;        // 读命令寄存器
+reg  [31:0]     read_addr_r;       // 读地址寄存器
+reg  [31:0]     hrdata_r;          // 读数据寄存器
+wire [31:0]     hrdata_w;          // 读数据信号
+reg  [31:0]     rdata_w;           // 读数据寄存器
+reg  [31:0]     rdata_r;           // 读数据寄存器
+reg             read_vld_r;        // 读有效寄存器
+wire            read_vld_w;        // 读有效信号
+wire [31:0]     rdataout_w;        // 读数据输出信号
 assign write_cmd_w  = din_vld_i & din_rdy_o & wr_en_i;
 assign read_cmd_w   = din_vld_i & din_rdy_o & rd_en_i;
 

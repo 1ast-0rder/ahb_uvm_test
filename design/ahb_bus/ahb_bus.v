@@ -1,5 +1,6 @@
 // 添加burst操作，添加brust仿真
 // 多主，仲裁
+
 module ahb_bus
 (
     input                       hclk,
@@ -17,35 +18,35 @@ module ahb_bus
     input                       dout_rdy_i
 );
 
-wire  [3:0]                     hprot_w;
-wire  [2:0]                     hburst_w;
-wire                            hmastlock_w;
-wire  [1:0]                     htrans_w;
-wire  [2:0]                     hsize_w;
-wire  [31:0]                    haddr_w;
-wire                            hwrite_w;
-wire  [31:0]                    hwdata_w;
-wire                            hreadyout_w;
-wire  [31:0]                    hrdata_w;
-wire  [1:0]                     hresp_w;
+wire  [3:0]  hprot_w;           // 保护控制信号
+wire  [2:0]  hburst_w;          // 突发类型信号
+wire         hmastlock_w;       // 主锁信号
+wire  [1:0]  htrans_w;          // 传输类型信号
+wire  [2:0]  hsize_w;           // 传输大小信号
+wire  [31:0] haddr_w;           // 地址信号
+wire         hwrite_w;          // 写使能信号  高为写、低为读
+wire  [31:0] hwdata_w;          // 写数据信号
+wire         hreadyout_w;       // 准备好输出信号
+wire  [31:0] hrdata_w;          // 读数据信号
+wire  [1:0]  hresp_w;           // 响应信号
 
-wire                            hready_in_w;
-wire                            slave0_sel_w;
-wire                            slave0_hreadyout_w;
-wire  [31:0]                    slave0_hrdata_w;
-wire  [1:0]                     slave0_hresp_w;
-wire                            slave1_sel_w;
-wire                            slave1_hreadyout_w;
-wire  [31:0]                    slave1_hrdata_w;
-wire  [1:0]                     slave1_hresp_w;
-wire                            slave2_sel_w;
-wire                            slave2_hreadyout_w;
-wire  [31:0]                    slave2_hrdata_w;
-wire  [1:0]                     slave2_hresp_w;
-wire                            slave3_sel_w;
-wire                            slave3_hreadyout_w;
-wire  [31:0]                    slave3_hrdata_w;
-wire  [1:0]                     slave3_hresp_w;
+wire         hready_in_w;       // 准备好输入信号
+wire         slave0_sel_w;      // 从设备0选择信号
+wire         slave0_hreadyout_w;// 从设备0准备好输出信号
+wire  [31:0] slave0_hrdata_w;   // 从设备0读数据信号
+wire  [1:0]  slave0_hresp_w;    // 从设备0响应信号
+wire         slave1_sel_w;      // 从设备1选择信号
+wire         slave1_hreadyout_w;// 从设备1准备好输出信号
+wire  [31:0] slave1_hrdata_w;   // 从设备1读数据信号
+wire  [1:0]  slave1_hresp_w;    // 从设备1响应信号
+wire         slave2_sel_w;      // 从设备2选择信号
+wire         slave2_hreadyout_w;// 从设备2准备好输出信号
+wire  [31:0] slave2_hrdata_w;   // 从设备2读数据信号
+wire  [1:0]  slave2_hresp_w;    // 从设备2响应信号
+wire         slave3_sel_w;      // 从设备3选择信号
+wire         slave3_hreadyout_w;// 从设备3准备好输出信号
+wire  [31:0] slave3_hrdata_w;   // 从设备3读数据信号
+wire  [1:0]  slave3_hresp_w;    // 从设备3响应信号
 
 ahb_master #
 (
