@@ -19,9 +19,9 @@ module ahb_master # (
     input  [2:0]                    burst_i,        // 突发类型输入信号
 
 
-    output reg [3:0]                hprot_o,           // 保护控制输出信号
+    output  [3:0]                hprot_o,           // 保护控制输出信号
     output reg [2:0]                hburst_o,          // 突发类型输出信号
-    output reg                      hmastlock_o,       // 主锁输出信号
+    output                       hmastlock_o,       // 主锁输出信号
     output reg [1:0]                htrans_o,          // 传输类型输出信号
     output reg [2:0]                hsize_o,           // 传输大小输出信号
     output reg [31:0]               haddr_o,           // 地址输出信号
@@ -187,11 +187,13 @@ assign rdata_o      = rdataout_w;
 
 //一个状态机控制传输，主要是burst传输用到
 always @(posedge hclk or negedge hresetn)
+begin
 if(~hresetn) begin
     trans_state <= ST_IDLE;
 end
 else begin
     trans_state <= trans_state_n;
+end
 end
 
 // 状态转移
@@ -209,6 +211,9 @@ begin
                 trans_state_n = ST_IDLE;
             else
                 trans_state_n = ST_TRANS;
+        end
+        default: begin 
+            trans_state_n = ST_IDLE;
         end
     endcase
 end
@@ -431,11 +436,11 @@ begin
         hsize_o = data_size_r;
 end
 // 控制HPORT
-// assign hprot_o = 4'b0000;
-always @(*)
-begin
-    hprot_o = 4'b0000;
-end                                         
+assign hprot_o = 4'b0000;
+// always @(*)
+// begin
+//     hprot_o = 4'b0000;
+// end                                         
 // 控制HWDATA
 // assign hwdata_o = wdata_r;
 always @(*)
@@ -444,11 +449,11 @@ begin
 end
 
 // 控制HMASTLOCK
-// assign hmastlock_o = 1'b0;
-always @(*)
-begin
-    hmastlock_o = 1'b0;
-end
+assign hmastlock_o = 1'b0;
+// always @(*)
+// begin
+//     hmastlock_o = 1'b0;
+// end
 
 
 // // assign haddr_o      = addr_i;
