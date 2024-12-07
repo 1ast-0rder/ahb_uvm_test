@@ -8,6 +8,8 @@ module ahb_bus
 
     input                       din_vld_i,
     output                      din_rdy_o,
+    input [2:0]                 burst_i,
+
     input                       wr_en_i,
     input                       rd_en_i,
     input  [2:0]                data_size_i,
@@ -66,6 +68,7 @@ ahb_master #
     .dout_vld_o                 (dout_vld_o             ),
     .rdata_o                    (rdata_o                ),
     .dout_rdy_i                 (dout_rdy_i             ),
+    .burst_i                    (burst_i                ),
 
     .hprot_o                    (hprot_w                ),
     .hburst_o                   (hburst_w               ),
