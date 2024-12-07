@@ -9,6 +9,7 @@ class ahb_transaction extends uvm_sequence_item;
     logic [2:0]                 data_size_i;
     logic [31:0]                addr_i;
     logic [31:0]                wdata_i;
+    logic [2:0]                 burst_i;// 0: single, 1: incr, 2: wrap4, 3: incr4, 4: wrap8, 5: incr8, 6: wrap16, 7: incr16
     logic                       dout_rdy_i;
 
     function new(string name = "ahb_transaction");
@@ -22,6 +23,7 @@ class ahb_transaction extends uvm_sequence_item;
         `uvm_field_int(data_size_i          , UVM_ALL_ON)
         `uvm_field_int(addr_i               , UVM_ALL_ON)
         `uvm_field_int(wdata_i              , UVM_ALL_ON)
+        `uvm_field_int(burst_i              , UVM_ALL_ON)
         `uvm_field_int(dout_rdy_i           , UVM_ALL_ON)
     `uvm_object_utils_end
 

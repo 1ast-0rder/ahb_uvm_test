@@ -30,6 +30,7 @@ class random_test_item extends ahb_transaction;
         rd_en_i     = ~r_wr_rd_en;
         data_size_i = r_data_size;
         addr_i      = r_addr;
+        burst_i     = 3'd0;
         if(data_size_i == 3'd2) begin
             addr_i[1:0] = 2'b0;
         end else if(data_size_i == 3'd1) begin

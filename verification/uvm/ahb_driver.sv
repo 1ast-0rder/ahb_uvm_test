@@ -34,6 +34,7 @@ task ahb_driver::main_phase(uvm_phase phase);
     vif.data_size_i     <= 3'b0;
     vif.addr_i          <= 32'b0;
     vif.wdata_i         <= 32'b0;
+    vif.burst_i         <= 3'b0;
 
     vif.dout_rdy_i      <= 1'b0;
 
@@ -52,6 +53,7 @@ task ahb_driver::main_phase(uvm_phase phase);
             driver_cmd.data_size= req.data_size_i;
             driver_cmd.addr     = req.addr_i;
             driver_cmd.wdata    = req.wdata_i;
+            driver_cmd.burst    = req.burst_i;
             driver_cmd_queue.push_back(driver_cmd);
         end
         seq_item_port.item_done();
@@ -72,6 +74,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
                 vif.data_size_i <= 3'b0;
                 vif.addr_i      <= 32'b0;
                 vif.wdata_i     <= 32'b0;
+                vif.burst_i     <= 3'b0;
             end else begin
                 vif.din_vld_i   <= 1'b1;
                 vif.wr_en_i     <= driver_cmd_tmp.wr_en;
@@ -79,6 +82,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
                 vif.data_size_i <= driver_cmd_tmp.data_size;
                 vif.addr_i      <= driver_cmd_tmp.addr;
                 vif.wdata_i     <= driver_cmd_tmp.wdata;
+                vif.burst_i     <= driver_cmd_tmp.burst;
             end
         end else begin
             vif.din_vld_i   <= 1'b0;
@@ -87,6 +91,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
             vif.data_size_i <= 3'b0;
             vif.addr_i      <= 32'b0;
             vif.wdata_i     <= 32'b0;
+            vif.burst_i     <= 3'b0;
         end
     end else begin
         vif.din_vld_i       <= 1'b0;
@@ -95,6 +100,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
         vif.data_size_i     <= 3'b0;
         vif.addr_i          <= 32'b0;
         vif.wdata_i         <= 32'b0;
+        vif.burst_i         <= 3'b0;
     end
     vif.dout_rdy_i          <= tr.dout_rdy_i;
     @(posedge vif.hclk);

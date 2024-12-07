@@ -38,6 +38,7 @@ ahb_bus u_ahb_bus
     .data_size_i                (ahb_vif.data_size_i    ),
     .addr_i                     (ahb_vif.addr_i         ),
     .wdata_i                    (ahb_vif.wdata_i        ),
+    .burst_i                    (ahb_vif.burst_i        ),
     .dout_vld_o                 (ahb_vif.dout_vld_o     ),
     .rdata_o                    (ahb_vif.rdata_o        ),
     .dout_rdy_i                 (ahb_vif.dout_rdy_i     )

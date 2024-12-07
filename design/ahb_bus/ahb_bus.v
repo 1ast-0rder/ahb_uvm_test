@@ -6,7 +6,7 @@ module ahb_bus
     input                       hclk,
     input                       hresetn,
 
-    input                       din_vld_i,
+    input                       din_vld_i,//将这个信号定义为开始一次新的传输，如果是burst传输，只有在开始时为高
     output                      din_rdy_o,
     input [2:0]                 burst_i,
 

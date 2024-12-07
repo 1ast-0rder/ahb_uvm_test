@@ -48,6 +48,7 @@ task ahb_monitor_in::collect_one_pkt(ahb_transaction tr);
         tr.data_size_i  = vif.data_size_i;
         tr.addr_i       = vif.addr_i;
         tr.wdata_i      = vif.wdata_i;
+        tr.burst_i      = vif.burst_i;
     end
     @(posedge vif.hclk);
 

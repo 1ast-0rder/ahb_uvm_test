@@ -16,6 +16,7 @@ class basic_test_item extends ahb_transaction;
                         end else begin                              \
                             wdata_i = 32'b0;                        \
                         end                                         \
+                        burst_i     = 3'd0;                         \
                     end
 
 

@@ -40,7 +40,7 @@ vcs_testbench:
 	cp cases/${tc}/${tc}.sv testcase.sv
 	vlogan -kdb -full64 -v2005 +systemverilogext+sv -sverilog -timescale=1ns/1ps ${MODE_OPTS} -f ${DUT_FILES}	|tee compile_design.log
 	vlogan -kdb -full64 -v2005 +systemverilogext+sv -ntb_opts uvm-1.1 -sverilog -timescale=1ns/1ps ${FSDB_OPTS} ${MODE_OPTS} +define+TB_TOP=${TB_TOP} -f ${TB_FILES} |tee compile_testbench.log
-	vcs -full64 -kdb -debug_access+all +error+10000 -error=noZMMCM $(VCS_HOME)/etc/uvm-1.1/dpi/uvm_dpi.cc -timescale=1ns/1ps ${VCS_OPTS} -top ${TB_TOP} |tee vcs_testbench.log
+	vcs -full64 -kdb -lca -debug_access+all +error+10000 -error=noZMMCM $(VCS_HOME)/etc/uvm-1.1/dpi/uvm_dpi.cc -timescale=1ns/1ps ${VCS_OPTS} -top ${TB_TOP} |tee vcs_testbench.log
 
 verdi_testbench:
 	cp cases/${tc}/${tc}.sv testcase.sv
