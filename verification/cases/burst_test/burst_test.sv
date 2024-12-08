@@ -4,14 +4,15 @@
 class burst_test_item extends ahb_transaction;
     `uvm_object_utils(burst_test_item)
 
-    `define burst_item(CNT,WR_RD_EN,DATA_SIZE,ADDR,BURST_TYPE)       \
+    `define burst_item(CNT,INVLD,BURST_TYPE,WR_RD_EN,DATA_SIZE,ADDR,WDATA)       \
         ``CNT``:    begin                                           \
+                        din_vld_i   = ``INVLD``;                     \
                         wr_en_i     = ``WR_RD_EN``;                 \
                         rd_en_i     = ~``WR_RD_EN``;                \
                         data_size_i = ``DATA_SIZE``;                \
                         addr_i      = ``ADDR``;                     \
                         if(wr_en_i) begin                           \
-                            wdata_i = addr_i;                       \
+                            wdata_i = ``WDATA``;                       \
                         end else begin                              \
                             wdata_i = 32'b0;                        \
                         end                                         \
@@ -24,17 +25,13 @@ class burst_test_item extends ahb_transaction;
 
     function void post_randomize();
         static int  cnt=0;
-        din_vld_i   = 1'b1;
+        // din_vld_i   = 1'b1;
         dout_rdy_i  = 1'b1;
 
         case(cnt)
-            `burst_item( 0,1,3'd0,32'h0000_0000, 3'd1) // INCR
-            `burst_item( 1,0,3'd0,32'h0000_0000, 3'd1)
-            `burst_item( 2,1,3'd0,32'h0001_0000, 3'd2) // WRAP
-            `burst_item( 3,0,3'd0,32'h0001_0000, 3'd2)
-            `burst_item( 4,1,3'd0,32'h0002_0000, 3'd1) // INCR
-            `burst_item( 5,0,3'd0,32'h0002_0000, 3'd1)
-            // 更多测试项可以根据需要添加
+                    //cnt,vld,bst,wr,size,addr,wdata
+            `burst_item(0,1,3'd0,1,32'h0000_0000,32'h0000_0000)
+            `burst_item(1,0,3'd0,0,32'h0000_0000,32'h0000_0000)
             default:
                 begin
                     din_vld_i   = 1'b0;

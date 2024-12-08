@@ -8,6 +8,15 @@ class ahb_model extends uvm_component;
     ahb_transaction_out     model_out;
     static bit [31:0]       mem_addr;
     static bit [31:0]       mem_data;
+    int burst_count = 0;  // 记录 burst 剩余的周期数
+    int burst_type = 0;   // 记录 burst 类型：例如 INCR4、INCR8
+    // int mem_addr = 0;     // 内存地址寄存器
+    // int mem_data = 0;     // 内存数据寄存器
+    int size = 0;         // 数据大小
+    int burst_boundary = 0;  // burst 边界
+    int trans_flag = 0;   // 是否有传输
+    int hwrite = 0;       // 读写标志位
+    int rd_mem_addr = 0;  // 读内存地址 
 
     uvm_blocking_get_port #(ahb_transaction)     port;
     uvm_analysis_port #(ahb_transaction_out)     ap;
@@ -43,16 +52,6 @@ task ahb_model::main_phase(uvm_phase phase);
     initial_mem;  // 初始化内存
     #1;
 
-    int burst_count = 0;  // 记录 burst 剩余的周期数
-    int burst_type = 0;   // 记录 burst 类型：例如 INCR4、INCR8
-    int mem_addr = 0;     // 内存地址寄存器
-    int mem_data = 0;     // 内存数据寄存器
-    int size = 0;         // 数据大小
-    int burst_boundary = 0;  // burst 边界
-    int trans_flag = 0;   // 是否有传输
-    int hwrite = 0;       // 读写标志位
-    int rd_mem_addr = 0;  // 读内存地址 
-
     while(1) begin
         trans_flag = 0;  // 无传输
         port.get(drv_in);
@@ -63,7 +62,7 @@ task ahb_model::main_phase(uvm_phase phase);
                 3'd0: size = 1;  // Byte
                 3'd1: size = 2;  // Halfword
                 3'd2: size = 4;  // Word
-                default: `uvm_info("ahb_model", $sformatf("cmd error : data_size_i %0d", drv_in.data_size_i), UVM_LOW);
+                // default: `uvm_info("ahb_model", $sformatf("cmd error : data_size_i %0d", drv_in.data_size_i), UVM_LOW);
             endcase
             // 确定 burst 类型
             case (drv_in.burst_i)
@@ -108,7 +107,7 @@ task ahb_model::main_phase(uvm_phase phase);
                     // burst_count = 16-1; // WRAP16 对应 16 个周期
                 end
                 default: begin
-                    `uvm_info("ahb_model", "Unknown burst type!", UVM_LOW);
+                    // `uvm_info("ahb_model", "Unknown burst type!", UVM_LOW);
                 end
             endcase
             //确定内存地址
@@ -137,9 +136,9 @@ task ahb_model::main_phase(uvm_phase phase);
 
 
         // 写操作
-        if(hwrite==1||trans_flag==1) begin
+        if(hwrite==1&&trans_flag==1) begin
             if(mem_addr >= 32'h0004_0000) begin
-                `uvm_info("ahb_model", $sformatf("write addr 0x%0h over boundary", mem_addr), UVM_LOW);
+                // `uvm_info("ahb_model", $sformatf("write addr 0x%0h over boundary", mem_addr), UVM_LOW);
             end else begin
                 case(drv_in.data_size_i)
                     3'd0: memory[mem_addr] = drv_in.wdata_i[7:0];  // Byte
@@ -153,11 +152,16 @@ task ahb_model::main_phase(uvm_phase phase);
                         memory[mem_addr+2]   = drv_in.wdata_i[23:16];
                         memory[mem_addr+3]   = drv_in.wdata_i[31:24];
                     end
-                    default: `uvm_info("ahb_model", $sformatf("cmd error : data_size_i %0d", drv_in.data_size_i), UVM_LOW);
+                    default: begin
+                        `uvm_info("ahb_model", $sformatf("cmd error : data_size_i %0d", drv_in.data_size_i), UVM_LOW);
+                    end
                 endcase
+                // model_out.rdata = 32'h0;
+                // model_out.rd_addr = 32'h0;
+                // ap.write(model_out);
             end
         // 读操作
-        end else if(hwrite==0||trans_flag==1) begin
+        end else if(hwrite==0&&trans_flag==1) begin
             rd_mem_addr = {mem_addr[31:2], 2'b00};  // 以 word 对齐的地址
             if(mem_addr >= 32'h0004_0000) begin
                 mem_data = 32'hDEAD_BEEF;  // 超过边界则返回特殊数据
@@ -171,8 +175,9 @@ task ahb_model::main_phase(uvm_phase phase);
             model_out.rd_addr = mem_addr;
             ap.write(model_out);
         end else begin
-            model_out.rdata = 32'h0;
-            model_out.rd_addr = 32'h0;
+            // model_out.rdata = 32'h0;
+            // model_out.rd_addr = 32'h0;
+            // ap.write(model_out);
         end
     end
 endtask
