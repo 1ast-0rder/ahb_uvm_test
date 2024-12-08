@@ -37,11 +37,12 @@ endtask
 task ahb_monitor_in::collect_one_pkt(ahb_transaction tr);
 
     while(1) begin
-        if(vif.din_vld_i && vif.din_rdy_o) break;
+        if(vif.din_vld_i || vif.din_rdy_o) break;
+        // if(vif.din_vld_i && vif.din_rdy_o) break;
         @(posedge vif.hclk);
     end
 
-    if(vif.din_vld_i && vif.din_rdy_o) begin
+    if(vif.din_vld_i || vif.din_rdy_o) begin
         tr.din_vld_i    = vif.din_vld_i;
         tr.wr_en_i      = vif.wr_en_i;
         tr.rd_en_i      = vif.rd_en_i;

@@ -70,7 +70,7 @@ reg [4:0] remain_beat;
 
 wire            write_cmd_w;       // 写命令信号
 wire            read_cmd_w;        // 读命令信号
-wire cmd_w; 
+// wire cmd_w; 
 reg  [31:0]     wdata_w;           // 写数据寄存器
 reg  [31:0]     wdata_r;           // 写数据寄存器
 reg             read_cmd_r;        // 读命令寄存器
@@ -82,9 +82,9 @@ reg  [31:0]     rdata_r;           // 读数据寄存器
 reg             read_vld_r;        // 读有效寄存器
 wire            read_vld_w;        // 读有效信号
 wire [31:0]     rdataout_w;        // 读数据输出信号
-assign write_cmd_w  = din_vld_i & din_rdy_o & wr_en_i;
-assign read_cmd_w   = din_vld_i & din_rdy_o & rd_en_i;
-assign cmd_w = write_cmd_w | read_cmd_w;
+assign write_cmd_w  = din_rdy_o & wr_en_i;
+assign read_cmd_w   = din_rdy_o & rd_en_i;
+// assign cmd_w = write_cmd_w | read_cmd_w;
 always @(posedge hclk or negedge hresetn)
 if(~hresetn) begin
     wdata_r <= 32'b0;
@@ -93,6 +93,8 @@ end else if(write_cmd_w) begin
 end else if(hreadyout_i & (hresp_i == 2'b00)) begin
     wdata_r <= 32'b0;
 end
+else
+    wdata_r <= wdata_r;
 
 always @(*) begin
     if(write_cmd_w) begin
@@ -201,13 +203,13 @@ always @(*)
 begin
     case(trans_state)
         ST_IDLE: begin
-            if(cmd_w)
+            if(din_vld_i)
                 trans_state_n = ST_TRANS;
             else
                 trans_state_n = ST_IDLE;
         end
         ST_TRANS: begin
-            if(remain_beat==0 && cmd_w==0)
+            if(remain_beat==0 && din_vld_i==0)
                 trans_state_n = ST_IDLE;
             else
                 trans_state_n = ST_TRANS;
@@ -225,7 +227,7 @@ begin
         remain_beat <= 0;
     end
     else begin
-        if(cmd_w) begin
+        if(din_vld_i) begin
             case(burst_i)
                 BST_SINGLE: begin
                     remain_beat <= 5'b00000;
@@ -270,7 +272,7 @@ end
 // 控制HTRANS
 always @(*)
 begin
-    if(cmd_w==1)
+    if(din_vld_i==1)
         htrans_o = TRANS_NONSEQ;
     else if(remain_beat>0)
         htrans_o = TRANS_SEQ;
@@ -281,32 +283,58 @@ end
 
 
 // 控制HADDR
-reg [2:0] size;
-
+reg [2:0] size_r;
+wire [2:0] size; 
+reg [2:0] size_w;
 always @(*)
 begin
     case(data_size_i)
         SIZE_BYTE: begin
-            size = 3'b001;
+            size_w = 3'b001;
         end
         SIZE_HWORD: begin
-            size = 3'b010;
+            size_w = 3'b010;
         end
         SIZE_WORD: begin
-            size = 3'b100;
+            size_w = 3'b100;
         end
         default: begin
-            size = 3'b000;
+            size_w = 3'b000;
         end
     endcase
-end          
+end                                    
+
+always @(posedge hclk or negedge hresetn)
+begin
+    if(~hresetn)
+        size_r <= 3'b000;
+    else if(din_vld_i)
+        case(data_size_i)
+            SIZE_BYTE: begin
+                size_r <= 3'b001;
+            end
+            SIZE_HWORD: begin
+                size_r <= 3'b010;
+            end
+            SIZE_WORD: begin
+                size_r <= 3'b100;
+            end
+            default: begin
+                size_r <= 3'b000;
+            end
+        endcase
+    else
+        size_r <= size_r;
+end  
+
+assign size = (din_vld_i==1)?size_w:size_r;
 
 reg [2:0] burst_r;
 always @(posedge hclk or negedge hresetn)           
     begin                                        
         if(!hresetn)                               
             burst_r <= 3'b000;                                   
-        else if(cmd_w)                                
+        else if(din_vld_i)                                
             burst_r <= burst_i;                            
         else                
             burst_r <= burst_r;                     
@@ -366,19 +394,19 @@ always @(posedge hclk or negedge hresetn)
 begin
     if (!hresetn)
         addr_r <= 32'b0;
-    else if (cmd_w)
+    else if (din_vld_i&&burst_i!=BST_SINGLE)
         addr_r <= addr_i + size;
-    else if (burst_r[0]==1 && remain_beat > 0)// incr
+    else if (din_rdy_o && (burst_r[0]==1) && (remain_beat > 0))// incr
         addr_r <= addr_r + size;
-    else if (burst_r[0]==0 && remain_beat > 0)// wrap
-        addr_r <= (addr_r)&(wrap_boundary)==(addr_r + size)&(wrap_boundary)?(addr_r + size):(addr_r+size-wrap_boundary);
+    else if (din_rdy_o && (burst_r[0]==0) && (remain_beat > 0) && burst_r!=BST_SINGLE)// wrap
+        addr_r <= (((addr_r)&(wrap_boundary))==((addr_r + size)&(wrap_boundary)))?(addr_r + size):(addr_r+size-wrap_boundary);
     else
         addr_r <= addr_r;
 end
 
 always @(*)
 begin
-    if(cmd_w==1)
+    if(din_vld_i==1||hreadyout_i==0)
         haddr_o = addr_i;
     else
         haddr_o = addr_r; 
@@ -390,7 +418,7 @@ always @(posedge hclk or negedge hresetn)
     begin                                        
         if(!hresetn)                               
             wr_r<= 1'b0;                                
-        else if(cmd_w)                                
+        else if(din_vld_i)                                
             wr_r<=wr_en_i;                
         else      
             wr_r<=wr_r;                               
@@ -399,7 +427,7 @@ always @(posedge hclk or negedge hresetn)
 
 always @(*)
 begin
-    if(cmd_w==1)
+    if(din_vld_i==1)
         hwrite_o = wr_en_i;
     else
         hwrite_o = wr_r;
@@ -409,7 +437,7 @@ end
 // assign hburst_o = (cmd_w==1)?burst_i:burst_r;
 always @(*)
 begin
-    if(cmd_w==1)
+    if(din_vld_i==1)
         hburst_o = burst_i;
     else
         hburst_o = burst_r;
@@ -421,7 +449,7 @@ always @(posedge hclk or negedge hresetn)
 begin
     if (!hresetn)
         data_size_r <= 3'b000;
-    else if (cmd_w)
+    else if (din_vld_i)
         data_size_r <= data_size_i;
     else
         data_size_r <= data_size_r;
@@ -430,7 +458,7 @@ end
 // assign hsize_o = (cmd_w==1)?data_size_i:data_size_r;
 always @(*)
 begin
-    if(cmd_w==1)
+    if(din_vld_i==1)
         hsize_o = data_size_i;
     else
         hsize_o = data_size_r;

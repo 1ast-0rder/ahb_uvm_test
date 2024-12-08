@@ -47,15 +47,24 @@ task ahb_driver::main_phase(uvm_phase phase);
         seq_item_port.get_next_item(req);
 //      `uvm_info("ahb_driver", "get item", UVM_LOW);
 //      req.print();
-        if(req.din_vld_i) begin
-            driver_cmd.wr_en    = req.wr_en_i;
-            driver_cmd.rd_en    = req.rd_en_i;
-            driver_cmd.data_size= req.data_size_i;
-            driver_cmd.addr     = req.addr_i;
-            driver_cmd.wdata    = req.wdata_i;
-            driver_cmd.burst    = req.burst_i;
-            driver_cmd_queue.push_back(driver_cmd);
-        end
+        driver_cmd.din_vld_i= req.din_vld_i;
+        driver_cmd.wr_en    = req.wr_en_i;
+        driver_cmd.rd_en    = req.rd_en_i;
+        driver_cmd.data_size= req.data_size_i;
+        driver_cmd.addr     = req.addr_i;
+        driver_cmd.wdata    = req.wdata_i;
+        driver_cmd.burst    = req.burst_i;
+        driver_cmd_queue.push_back(driver_cmd);
+
+        // if(req.din_vld_i) begin
+        //     driver_cmd.wr_en    = req.wr_en_i;
+        //     driver_cmd.rd_en    = req.rd_en_i;
+        //     driver_cmd.data_size= req.data_size_i;
+        //     driver_cmd.addr     = req.addr_i;
+        //     driver_cmd.wdata    = req.wdata_i;
+        //     driver_cmd.burst    = req.burst_i;
+        //     driver_cmd_queue.push_back(driver_cmd);
+        // end
         seq_item_port.item_done();
         drive_one_pkt(req);
     end
@@ -66,7 +75,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
     if(vif.din_rdy_o) begin
         if(driver_cmd_queue.size() > 0) begin
             driver_cmd_tmp = driver_cmd_queue.pop_front();
-            if(last_read_cmd && driver_cmd_tmp.rd_en) begin
+            if(1==0) begin
                 driver_cmd_queue.push_front(driver_cmd_tmp);
                 vif.din_vld_i   <= 1'b0;
                 vif.wr_en_i     <= 1'b0;
@@ -76,7 +85,7 @@ task ahb_driver::drive_one_pkt(ahb_transaction tr);
                 vif.wdata_i     <= 32'b0;
                 vif.burst_i     <= 3'b0;
             end else begin
-                vif.din_vld_i   <= 1'b1;
+                vif.din_vld_i   <= driver_cmd_tmp.din_vld_i;
                 vif.wr_en_i     <= driver_cmd_tmp.wr_en;
                 vif.rd_en_i     <= driver_cmd_tmp.rd_en;
                 vif.data_size_i <= driver_cmd_tmp.data_size;

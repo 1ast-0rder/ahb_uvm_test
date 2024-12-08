@@ -7,6 +7,8 @@ make:
         make clean vcs_testbench run wave=on tc=basic_test
     or
         make clean vcs_testbench run wave=on tc=random_test test_cmd_num=3000 seed=99
+    or 
+        make clean vcs_testbench run wave=on tc=burst_test
 
 open wave:
         make verdi wave=on

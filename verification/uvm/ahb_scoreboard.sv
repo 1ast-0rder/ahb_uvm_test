@@ -36,6 +36,8 @@ task ahb_scoreboard::main_phase(uvm_phase phase);
         while (1) begin
             act_port.get(get_actual);
             if(expect_queue.size() > 0) begin
+                // `uvm_info("ahb_scoreboard", $sformatf("current test: %0d", test_cnt), UVM_LOW)
+                // `uvm_info("ahb_scoreboard", $sformatf("MAX test: %0d", `TEST_CMD_NUM), UVM_LOW)
                 tmp_tran = expect_queue.pop_front();
                 result = get_actual.compare(tmp_tran);
                 if(result) begin 
@@ -48,6 +50,7 @@ task ahb_scoreboard::main_phase(uvm_phase phase);
                     `uvm_info("ahb_scoreboard : the dut out is", get_actual.sprint(), UVM_LOW);
                 end
                 test_cnt = test_cnt+1;
+
                 if(test_cnt == `TEST_CMD_NUM) begin
                     break;
                 end

@@ -68,6 +68,7 @@ end
 
 // run uvm
 initial begin
+    uvm_root::get().set_timeout(300, 1);  // 设置仿真超时为 10us，1 表示强制终止
     run_test();
 end
 

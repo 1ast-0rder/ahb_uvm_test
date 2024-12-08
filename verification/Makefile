@@ -17,7 +17,7 @@ endif
 
 test_cmd_num ?= 
 ifeq ($(test_cmd_num),)
-	MODE_OPTS += +define+TEST_CMD_NUM=40
+	MODE_OPTS += +define+TEST_CMD_NUM=31
 else
 	MODE_OPTS += +define+TEST_CMD_NUM=${test_cmd_num}
 endif

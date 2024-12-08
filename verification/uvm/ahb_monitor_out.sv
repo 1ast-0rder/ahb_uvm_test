@@ -37,27 +37,59 @@ task ahb_monitor_out::main_phase(uvm_phase phase);
 endtask
 
 
+// task ahb_monitor_out::collect_one_pkt(ahb_transaction_out tr);
+
+//     while(1) begin
+//         if( vif.din_rdy_o && vif.rd_en_i) begin
+//         // if(vif.din_vld_i && vif.din_rdy_o && vif.rd_en_i) begin
+//             rd_addr_queue.push_back(vif.addr_i);
+//         end
+//         if(vif.dout_vld_o && vif.dout_rdy_i) break;
+//         @(posedge vif.hclk);
+//     end
+
+//     if(vif.dout_vld_o && vif.dout_rdy_i) begin
+//         if(rd_addr_queue.size() > 0) begin
+//             tr.rd_addr  = rd_addr_queue.pop_front();
+//         end else begin
+//             `uvm_error("ahb_monitor_out", "rd addr queue is empty !!!");
+//         end
+//         tr.rdata    = vif.rdata_o;
+//     end
+//     //`uvm_info("ahb_monitor_out : dut_out is ", tr.sprint(), UVM_LOW);
+//     @(posedge vif.hclk);
+
+// endtask
 task ahb_monitor_out::collect_one_pkt(ahb_transaction_out tr);
 
+    // // 首先处理新的读地址请求
+    // if (vif.din_rdy_o && vif.rd_en_i) begin
+    //     rd_addr_queue.push_back(vif.addr_i);
+    // end
+
+    // 然后检查是否有数据读出
     while(1) begin
-        if(vif.din_vld_i && vif.din_rdy_o && vif.rd_en_i) begin
+        if (vif.din_rdy_o && vif.rd_en_i) begin
             rd_addr_queue.push_back(vif.addr_i);
         end
-        if(vif.dout_vld_o && vif.dout_rdy_i) break;
-        @(posedge vif.hclk);
-    end
-
-    if(vif.dout_vld_o && vif.dout_rdy_i) begin
-        if(rd_addr_queue.size() > 0) begin
-            tr.rd_addr  = rd_addr_queue.pop_front();
-        end else begin
-            `uvm_error("ahb_monitor_out", "rd addr queue is empty !!!");
+        if (vif.dout_vld_o && vif.dout_rdy_i) begin
+            if (rd_addr_queue.size() > 0) begin
+                tr.rd_addr  = rd_addr_queue.pop_front();  // 读取对应的读地址
+            end else begin
+                `uvm_error("ahb_monitor_out", "rd addr queue is empty !!!");
+            end
+            tr.rdata    = vif.rdata_o;  // 读取输出数据
+            break;  // 读完数据后退出循环，准备处理下一个pkt
         end
-        tr.rdata    = vif.rdata_o;
+        @(posedge vif.hclk);  // 等待时钟上升沿
     end
-    //`uvm_info("ahb_monitor_out : dut_out is ", tr.sprint(), UVM_LOW);
-    @(posedge vif.hclk);
 
+    // // 最后在当前周期结束前，再次处理新的读地址请求，确保不会错过新请求
+    // if (vif.din_rdy_o && vif.rd_en_i) begin
+    //     rd_addr_queue.push_back(vif.addr_i);
+    // end
+
+    @(posedge vif.hclk);  // 等待下一个时钟周期
 endtask
 
 `endif

@@ -1,5 +1,6 @@
 
 typedef struct {
+    logic                       din_vld_i;
     logic                       wr_en;
     logic                       rd_en;
     logic [2:0]                 data_size;
